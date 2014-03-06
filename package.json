@@ -1,10 +1,10 @@
 {
   "name": "file-size-watcher",
-  "version": "0.0.0",
-  "description": "Watches files for growth, emitting an event when they do.",
+  "version": "0.0.1",
+  "description": "Watches files for size changes, emitting an event when they do.", 
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   "author": "Alex Middeleer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alexmiddeleer/node-file-growth/issues"
+    "url": "https://github.com/alexmiddeleer/node-file-size-watcher/issues"
   },
-  "homepage": "https://github.com/alexmiddeleer/node-file-growth"
+  "homepage": "https://github.com/alexmiddeleer/node-file-size-watcher"
 }
