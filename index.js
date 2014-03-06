@@ -14,13 +14,13 @@ function checkFileSize (fn, oldSize, cb, onErr) {
 }
 
 module.exports = {
-	makeFileWatcher: function(fileName, ms){
+	watch: function(fileName, ms){
 		var watcher = new events.EventEmitter(),
 			currSize = -1,
 			pulse,
 			fileSizeChangeHandler,
 			errorHandler,
-			movement;
+			check;
 		
 		fileSizeChangeHandler = function(newSize) {
 			if(currSize !== -1){
@@ -33,16 +33,20 @@ module.exports = {
 			watcher.emit('error',error);
 		};
 	
-		movement = function(){
+		check = function(){
 			checkFileSize(fileName, currSize, fileSizeChangeHandler, errorHandler);
 		};
 
+		// Immediately check file size to set baseline
+		check();
+
 		watcher.go = function() { 
-			pulse = setInterval( movement, (ms || 1000)); 
+			pulse = setInterval( check, (ms || 1000)); 
 		};
 		
 		watcher.stop = function() { pulse && clearInterval(pulse); };
 
+		// Start watching automatically
 		watcher.go();
 		return watcher;
 	}
