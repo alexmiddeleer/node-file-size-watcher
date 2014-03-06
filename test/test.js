@@ -10,13 +10,20 @@ function makeFileGrow (txt, cb) {
 	}); 
 }
 
+function makeFileShrink (txt, cb) {
+	fs.truncate(fn, 1, function(err) {
+		cb(err);
+	}); 
+}
+
 function listenForSizeChange (watcher, cb) {
-	var notDone = true
-	watcher.on('sizeChange', function(){
+	var notDone = true,
+		currSize = watcher.info().size;
+	watcher.once('sizeChange', function(newSize){
 		notDone = false;
-		cb();	
+		cb(newSize-currSize);	
 	});
-	watcher.on('error',function(e) {
+	watcher.once('error',function(e) {
 		throw(e);
 	});
 	setTimeout(function tooSlow() {
@@ -24,21 +31,28 @@ function listenForSizeChange (watcher, cb) {
 	}, 2000);
 }
 
-// -------------------------------------------------------
+function emoteSuccess (testDesc) {
+	console.log("Test Passed.");
+}
+
 // First just create a file to test with
-// -------------------------------------------------------
-beforeEach(function(done){
-	makeFileGrow("Creating a file\n", done);
+before(function(done){
+	console.log("Creating a test file");
+	makeFileGrow("Creating a file\n", function() {
+		watcher = fsw.watch(fn, 1000);
+		done();
+	});
 });
 
-// -------------------------------------------------------
 // Test to see if watcher detects file growth.  
-// -------------------------------------------------------
-describe('watch',function(){
-	describe('#growth', function(){
-		it('should see file grow', function(done) {
-			var watcher = fsw.watch(fn, 1000);
-			listenForSizeChange(watcher, function() {
+describe('watching',function(){
+	describe('#changes', function(){
+		var desc1 = "Test 1: File grows, watcher detects this.";
+		it(desc1, function(done) {
+			console.log(desc1);
+			listenForSizeChange(watcher, function(sizeChange) {
+				assert((sizeChange>0),"File size is positive");
+				emoteSuccess(desc1);
 				done();
 			});
 	
@@ -48,13 +62,44 @@ describe('watch',function(){
 				} 
 			});
 		});
+
+		var desc2 = "Test 2: File grows, watcher detects this.";
+		it(desc2, function(done) {
+			console.log(desc2);
+			listenForSizeChange(watcher, function(sizeChange) {
+				assert((sizeChange>0),"File size is positive");
+				emoteSuccess(desc2);
+				done();
+			});
+	
+			makeFileGrow("testing... 2\n", function afterGrow(err) {
+				if (err) { 
+					done(err);
+				} 
+			});
+		});
+
+		var desc3 = "Test 3: File shrinks, watcher detects this.";
+		it(desc3, function(done) {
+			console.log(desc3);
+			listenForSizeChange(watcher, function(sizeChange) {
+				assert((sizeChange<0),"File size is negative");
+				emoteSuccess(desc3);
+				done();
+			});
+	
+			makeFileShrink("testing... 2\n", function afterAfterShrink(err) {
+				if (err) { 
+					done(err);
+				} 
+			});
+		});
 	});
 });
 
-// -------------------------------------------------------
 // Remove the testing file after tests finish
-// -------------------------------------------------------
-afterEach(function(done) {
+after(function(done) {
+	console.log("Removing test file...");
 	fs.unlink(fn, function(e) {
 		done();
 	});

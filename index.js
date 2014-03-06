@@ -24,7 +24,10 @@ module.exports = {
 		
 		fileSizeChangeHandler = function(newSize) {
 			if(currSize !== -1){
-				watcher.emit('sizeChange',newSize);
+				watcher.emit('sizeChange', newSize);
+			} else
+			{
+				watcher.emit('ready', newSize);
 			}
 			currSize = newSize;
 		};
@@ -37,17 +40,21 @@ module.exports = {
 			checkFileSize(fileName, currSize, fileSizeChangeHandler, errorHandler);
 		};
 
-		// Immediately check file size to set baseline
-		check();
-
 		watcher.go = function() { 
 			pulse = setInterval( check, (ms || 1000)); 
 		};
 		
 		watcher.stop = function() { pulse && clearInterval(pulse); };
 
-		// Start watching automatically
-		watcher.go();
+		watcher.info = function() {
+			return {
+			 size: currSize
+			};
+		};
+
+		// Immediately check file size to set baseline.  Then start watching on an interval.
+		check();
+		watcher.once('ready',function() { watcher.go(); });
 		return watcher;
 	}
 };
