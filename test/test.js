@@ -24,11 +24,25 @@ function listenForSizeChange (watcher, cb) {
 		cb(newSize-currSize);	
 	});
 	watcher.once('error',function(e) {
-		throw(e);
+		if (notDone) throw(e);
 	});
 	setTimeout(function tooSlow() {
 		if(notDone)	throw("test timed out");
 	}, 2000);
+}
+
+function ignoreSizeChange (watcher, cb) {
+	var notDone = true;
+	watcher.once('sizeChange', function(){
+		if (notDone) throw("test failed.. to time out");
+	});
+	watcher.once('error',function(e) {
+		if (notDone) throw(e);
+	});
+	setTimeout(function tooSlow() {
+		notDone = false;
+		cb();
+	}, 500);
 }
 
 function emoteSuccess (testDesc) {
@@ -39,13 +53,13 @@ function emoteSuccess (testDesc) {
 before(function(done){
 	console.log("Creating a test file");
 	makeFileGrow("Creating a file\n", function() {
-		watcher = fsw.watch(fn, 1000);
+		watcher = fsw.watch(fn, 100);
 		done();
 	});
 });
 
 // Test to see if watcher detects file growth.  
-describe('watching',function(){
+describe('watcher',function(){
 	describe('#changes', function(){
 		var desc1 = "Test 1: File grows, watcher detects this.";
 		it(desc1, function(done) {
@@ -88,19 +102,72 @@ describe('watching',function(){
 				done();
 			});
 	
-			makeFileShrink("testing... 2\n", function afterAfterShrink(err) {
+			makeFileShrink("testing... 3\n", function afterAfterShrink(err) {
 				if (err) { 
 					done(err);
 				} 
 			});
 		});
 	});
-});
 
-// Remove the testing file after tests finish
-after(function(done) {
-	console.log("Removing test file...");
-	fs.unlink(fn, function(e) {
-		done();
+	describe("controlling",function(){
+
+		var desc4 = "Test 4: stop watcher"
+		it(desc4,function(done) {
+			console.log(desc4);
+			watcher.stop();
+			ignoreSizeChange(watcher, function() {
+				emoteSuccess(desc4);
+				done();
+			});
+
+			makeFileGrow("testing... 4\n", function afterGrow(err) {
+				if (err) { 
+					done(err);
+				} 
+			});
+		});
+
+		var desc5 = "Test 5: resume watcher"
+		it(desc5,function(done) {
+			console.log(desc5);
+			watcher.go();
+			listenForSizeChange(watcher, function(sizeChange) {
+				assert((sizeChange>0),"File size is positive");
+				emoteSuccess(desc5);
+				done();
+			});
+
+			makeFileGrow("testing... 5\n", function afterAfterShrink(err) {
+				if (err) { 
+					done(err);
+				} 
+			});
+		});
+	});
+
+	describe('other stuff',function() {
+		var desc6 = "Testing info()";
+		it(desc6, function() {
+			console.log(desc6);
+			console.log("Size of file is: " + watcher.info().size + " bytes");
+			assert(watcher.info().size>0,"Watcher.info reports positive size");
+		});
+	
+		// Delete file then test to make sure watcher emits an error event
+		var desc7 ='Testing error event emission';
+		it(desc7, function(done) {
+			console.log(desc7);
+			watcher.on('error',function(e) {
+				console.log("watcher correctly saw error: " + e);
+				assert(e.toString()!=="","Testing error msg existence");
+				done();
+			});
+			console.log("Removing test file...");
+			fs.unlink(fn, function(e) {
+				if(e) throw(e);
+			});
+		});
 	});
 });
+
