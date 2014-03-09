@@ -24,9 +24,8 @@ module.exports = {
 		
 		fileSizeChangeHandler = function(newSize) {
 			if(currSize !== -1){
-				watcher.emit('sizeChange', newSize);
-			} else
-			{
+				watcher.emit('sizeChange', newSize, currSize);
+			} else {
 				watcher.emit('ready', newSize);
 			}
 			currSize = newSize;
@@ -48,7 +47,7 @@ module.exports = {
 
 		watcher.info = function() {
 			return {
-			 size: currSize
+				size: currSize
 			};
 		};
 
