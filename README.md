@@ -1,7 +1,7 @@
 node-file-size-watcher
 ===============
 
-Watches files for growth in Node.
+Watches files for size changes in Node.js. Tiny, unit tested, and no dependencies.
 
 ``` js
 // Example usage:
