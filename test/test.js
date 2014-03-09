@@ -2,7 +2,8 @@
 var assert = require('assert'),
 	fs = require('fs'),
 	fn = 'test/testfile',
-	fsw = require('../index.js')
+	fsw = require('../index.js'),
+	watcher;
 
 function makeFileGrow (txt, cb) {
 	fs.appendFile(fn, txt, function(err) {
@@ -152,6 +153,7 @@ describe('watcher',function(){
 			console.log(desc6);
 			console.log("Size of file is: " + watcher.info().size + " bytes");
 			assert(watcher.info().size>0,"Watcher.info reports positive size");
+			emoteSuccess(desc6);
 		});
 	
 		// Delete file then test to make sure watcher emits an error event
@@ -162,11 +164,25 @@ describe('watcher',function(){
 				console.log("watcher correctly saw error: " + e);
 				assert(e.toString()!=="","Testing error msg existence");
 				done();
+				emoteSuccess(desc7);
+				watcher.stop();
+				watcher.removeAllListeners();
 			});
 			console.log("Removing test file...");
 			fs.unlink(fn, function(e) {
 				if(e) throw(e);
 			});
+		});
+
+		var desc8 ='Try running on nonexistent file';
+		it(desc8, function(done) {
+			console.log(desc8);
+			var newWatcher = fsw.watch('doesNotExist.log',100);
+			newWatcher.on('error',function(e) {});
+			setTimeout(function() {
+				emoteSuccess(desc8);
+				done();
+			}, 200);
 		});
 	});
 });
