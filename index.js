@@ -43,7 +43,7 @@ module.exports = {
 		// with those initial events.
 		// -------------------------------------------------------
 		if (onErr) watcher.on('error', onErr);
-		if (onReady) watcher.on('Ready', onReady);
+		if (onReady) watcher.on('ready', onReady);
 
 		fileSizeChangeHandler = function(newSize) {
 			if(currSize !== -1){
