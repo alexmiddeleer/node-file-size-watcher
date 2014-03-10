@@ -10,11 +10,13 @@ Watches files for size changes in Node.js. Tiny, unit tested, and no dependencie
  * onErr - Error handler.  Users can listen for `'error'` events themselves, but setting this avoids possible race conditions.
  * onRead - Same thing as onErr, but for `'ready'` event.
 
- Events:
+###Events
 
  * `'sizeChange'` - passes new size and old size to listeners.
  * `'ready'` - passes initial size to listeners (called only once).
  * `'error'` - Passes any error objects to listeners. Includes ENOENTs, so prepare for lots of those if the file is missing. Program will keep running regardless of whether this is listened to.
+
+###Example
 
 ``` js
 // Example usage:
