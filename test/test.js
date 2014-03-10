@@ -175,15 +175,38 @@ describe('watcher',function(){
 		});
 
 		var desc8 ='Try running on nonexistent file';
+		var newWatcher;
 		it(desc8, function(done) {
 			console.log(desc8);
-			var newWatcher = fsw.watch('doesNotExist.log',100);
+			newWatcher = fsw.watch('test/doesNotExist.log',100);
 			newWatcher.on('error',function(e) {});
 			setTimeout(function() {
 				emoteSuccess(desc8);
 				done();
 			}, 200);
 		});
+
+		var desc9 ='Watcher detects file appearing out of nonexistence as a size change.';
+		it(desc9, function(done) {
+			console.log(desc9);
+			fn = 'test/doesNotExist.log';
+			listenForSizeChange(newWatcher, function(sizeChange) {
+				assert((sizeChange>0),"File size is positive");
+				emoteSuccess(desc9);
+				done();
+			});
+			makeFileGrow("testing...\n", function afterGrow(err) {
+				if (err) { 
+					done(err);
+				} 
+			});
+		});
 	});
 });
 
+after(function(done) {
+	fs.unlink(fn, function(e) {
+		if(e) throw(e);
+		done();
+	});
+});
