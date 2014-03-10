@@ -25,7 +25,7 @@ Watches files for size changes in Node.js. Tiny, unit tested, and no dependencie
 var fileName = process.argv[2];
 
 require('./index.js').watch(fileName).on('sizeChange',
-	function callback(newSize){
+	function callback(newSize, oldSize){
 		console.log('The file size changed to ' + newSize);
 	}
 );
