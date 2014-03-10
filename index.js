@@ -21,15 +21,30 @@ function checkFileSize (fn, oldSize, cb, onErr) {
 }
 
 module.exports = {
-	watch: function(fileName, ms){
+	watch: function(fd, ms, onErr, onReady){
+
+		ms = ms || 100;
+
 		var watcher = new events.EventEmitter(),
 			currSize = -1,
 			pulse,
 			fileSizeChangeHandler,
 			errorHandler,
-			check,
-			going = false;
-		
+			check;
+
+		// -------------------------------------------------------
+		// Ignored 'error' events will cause the program to crash.
+		// Do not let this happen.
+		// -------------------------------------------------------
+		onErr = onErr || function() {};
+
+		// -------------------------------------------------------
+		// Without these, the user might run into race conditions
+		// with those initial events.
+		// -------------------------------------------------------
+		if (onErr) watcher.on('error', onErr);
+		if (onReady) watcher.on('Ready', onReady);
+
 		fileSizeChangeHandler = function(newSize) {
 			if(currSize !== -1){
 				watcher.emit('sizeChange', newSize, currSize);
@@ -41,20 +56,19 @@ module.exports = {
 	
 		errorHandler = function(error) {
 			watcher.emit('error',error);
+			onErr(error);
 		};
 	
 		check = function(){
-			checkFileSize(fileName, currSize, fileSizeChangeHandler, errorHandler);
+			checkFileSize(fd, currSize, fileSizeChangeHandler, errorHandler);
 		};
 
 		watcher.go = function() { 
-			if (!going) pulse = setInterval( check, (ms || 1000)); 
-			going = true;
+			pulse = setInterval( check, (ms || 1000)); 
 		};
 		
 		watcher.stop = function() { 
 			pulse && clearInterval(pulse); 
-			going = false;
 		};
 
 		watcher.info = function() {
@@ -66,7 +80,6 @@ module.exports = {
 		// Immediately check file size to set baseline.  Then start watching on an interval.
 		check();
 		watcher.once('ready',function() { watcher.go(); });
-		watcher.once('error',function() { watcher.go(); });
 		return watcher;
 	}
 };
