@@ -3,7 +3,10 @@ node-file-size-watcher
 
 Watches files for size changes in Node.js. Tiny, unit tested, and no dependencies.
 
+###Usage
 `watch(fd, [interval], [onErr], [onReady])`
+
+Returns an [EventEmitter](http://nodejs.org/api/events.html#events_class_events_eventemitter).
 
  * fd - File descriptor (anything fs.stat accepts for a file descriptor)
  * interval - pause between checks in milliseconds.
@@ -24,7 +27,7 @@ Watches files for size changes in Node.js. Tiny, unit tested, and no dependencie
 // Then add some text to fileToWatch and save it.
 var fileName = process.argv[2];
 
-require('./index.js').watch(fileName).on('sizeChange',
+require('file-size-watcher').watch(fileName).on('sizeChange',
 	function callback(newSize, oldSize){
 		console.log('The file size changed to ' + newSize);
 	}
