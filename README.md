@@ -7,7 +7,7 @@ Watches files for size changes in Node.js. Tiny, unit tested, and no dependencie
 ``` js
 require('file-size-watcher').watch("fileName.txt").on('sizeChange',
 	function callback(newSize, oldSize){
-		console.log('The file size changed to ' + newSize);
+		console.log('The file size changed from ' + oldSize + ' to ' + newSize);
 	}
 );
 ```
@@ -15,10 +15,10 @@ require('file-size-watcher').watch("fileName.txt").on('sizeChange',
 The `watch` method returns an [EventEmitter](http://nodejs.org/api/events.html#events_class_events_eventemitter). It takes the following parameters:
 
 `watch(fd, [interval], [onErr], [onReady])`
- * fd - File descriptor (anything fs.stat accepts for a file descriptor)
- * interval - pause between checks in milliseconds.
- * onErr - Error handler.  Users can listen for `'error'` events themselves, but setting this avoids possible race conditions.
- * onRead - Same thing as onErr, but for `'ready'` event.
+ * `fd` - File descriptor (anything `fs.stat` accepts for a file descriptor)
+ * `interval` - pause between checks in milliseconds.
+ * `onErr` - Error handler.  Users can listen for `'error'` events themselves, but setting this avoids possible race conditions.
+ * `onReady` - Same thing as onErr, but for `'ready'` event.
 
 ###Events
 
