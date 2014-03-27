@@ -1,6 +1,6 @@
 {
   "name": "file-size-watcher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Watches files for size changes, emitting an event when they do.", 
   "main": "index.js",
   "scripts": {
