@@ -1,5 +1,6 @@
 node-file-size-watcher
 ===============
+# This project is no longer being updated or maintained.
 
 Watches files for size changes in Node.js. Tiny, unit tested, and no dependencies.
 
